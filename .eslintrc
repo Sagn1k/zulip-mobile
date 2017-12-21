@@ -34,6 +34,7 @@
     "comma-dangle": [2, "always-multiline"],
     "quote-props": 0,
     "indent": 0,
+    "camelcase": 0,
     "arrow-parens": 0,
     "no-confusing-arrow": 0,
     "no-mixed-operators": 0,
@@ -53,6 +54,7 @@
     "react/sort-comp": 0,
     "react/jsx-filename-extension": 0,
     "react/no-unused-prop-types": 0,
+    "react/no-array-index-key": 0,
     "react/prefer-stateless-function": 0,
     "react/require-default-props": 0,
     "react/jsx-wrap-multilines": 0,
@@ -116,6 +118,7 @@
         "gravatar_hash", "pms", "msgs", "collapsable", "const", "wildcard", "reactotron", "camelcase",
         "hydrator", "perf", "stacktrace", "Dir", "fs", "avoider", "octicons", "centerer", "ldap",
         "gravatar", "identicon", "blueimp", "filename", "wildcards", "jpeg", "jpg", "tif", "mov",
+        "notif", "diag"
       ],
       "skipIfMatch": [
         "http://[^s]*",

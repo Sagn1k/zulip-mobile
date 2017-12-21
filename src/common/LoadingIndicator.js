@@ -1,31 +1,17 @@
 /* @noflow */
 import React, { PureComponent } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
+import * as Progress from 'react-native-progress';
 
 import type { StyleObj } from '../types';
 import messageLoadingImg from '../../static/img/message-loading.png';
-import AnimatedRotateComponent from '../animation/AnimatedRotateComponent';
 
 const styles = StyleSheet.create({
   row: {
-    padding: 8,
+    padding: 4,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  loading: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 8,
-  },
-  semiCircle: {
-    alignSelf: 'center',
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 100,
-  },
-  semiCircleCover: {
-    position: 'absolute',
   },
   logo: {
     alignSelf: 'center',
@@ -42,7 +28,6 @@ const styles = StyleSheet.create({
 
 type Props = {
   active: boolean,
-  caughtUp: boolean,
   size: number,
   backgroundColor: StyleObj,
 };
@@ -53,33 +38,22 @@ export default class LoadingIndicator extends PureComponent<Props> {
   static defaultProps = {
     active: false,
     caughtUp: false,
-    size: 32,
+    size: 40,
   };
 
   render() {
-    const { active, caughtUp, size, backgroundColor } = this.props;
+    const { active, caughtUp, size } = this.props;
 
     return (
       <View style={styles.row}>
-        {caughtUp && <View style={styles.line} />}
-        <View style={styles.loading}>
+        <View>
           {active && (
-            <AnimatedRotateComponent>
-              <View style={[styles.semiCircle, { width: size, height: size }]} />
-              <View
-                style={[
-                  styles.semiCircleCover,
-                  backgroundColor,
-                  {
-                    height: size / 2,
-                    width: size,
-                  },
-                ]}
-              />
-            </AnimatedRotateComponent>
+            <View>
+              <Progress.CircleSnail color="black" size={size} thickness={2} />
+            </View>
           )}
           <Image
-            style={[styles.logo, { width: size / 4 * 3, height: size / 4 * 3 }]}
+            style={[styles.logo, { width: size / 2, height: size / 2, marginTop: size / 4 }]}
             source={messageLoadingImg}
             resizeMode="contain"
           />

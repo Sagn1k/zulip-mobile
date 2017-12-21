@@ -81,7 +81,8 @@ export default class InfiniteScrollView extends PureComponent<Props, State> {
   _keyboardShow(e) {
     this._keyboardHeight = e.endCoordinates.height;
 
-    if (!listComponent) {
+    if (!listComponent || !(this._keyboardHeight > 0)) {
+      //this._keyboardHeight = undefined;
       return;
     }
 
@@ -97,7 +98,7 @@ export default class InfiniteScrollView extends PureComponent<Props, State> {
   }
 
   _keyboardHide() {
-    if (_scrollOffset && listComponent) {
+    if (_scrollOffset && listComponent && this._keyboardHeight > 0) {
       listComponent.scrollTo({
         x: 0,
         y: _scrollOffset - this._keyboardHeight,
@@ -186,12 +187,13 @@ export default class InfiniteScrollView extends PureComponent<Props, State> {
 
   render() {
     const { autoScrollToBottom } = this.state;
+    const { anchor, children, contentContainerStyle, listRef, style } = this.props;
 
     return (
       <AnchorScrollView
-        style={this.props.style}
-        anchor={this.props.anchor}
-        contentContainerStyle={this.props.contentContainerStyle}
+        style={style}
+        anchor={anchor}
+        contentContainerStyle={contentContainerStyle}
         automaticallyAdjustContentInset={false}
         scrollsToTop
         overScrollMode="always"
@@ -204,11 +206,10 @@ export default class InfiniteScrollView extends PureComponent<Props, State> {
         removeClippedSubviews
         ref={(component: any) => {
           listComponent = component;
-          const { listRef } = this.props;
           if (listRef) listRef(component);
         }}
       >
-        {this.props.children}
+        {children}
       </AnchorScrollView>
     );
   }

@@ -10,6 +10,7 @@ import {
   TOGGLE_COMPOSE_TOOLS,
   CANCEL_EDIT_MESSAGE,
   START_EDIT_MESSAGE,
+  SAVE_INTIAL_NOTIFICATION,
 } from '../actionConstants';
 import { getMessageById } from '../api';
 import { getAuth } from '../selectors';
@@ -56,7 +57,7 @@ export const toggleComposeTools = () => ({
   type: TOGGLE_COMPOSE_TOOLS,
 });
 
-export const startEditMessage = (messageId: number) => async (
+export const startEditMessage = (messageId: number, topic: string) => async (
   dispatch: Dispatch,
   getState: GetState,
 ) => {
@@ -65,6 +66,7 @@ export const startEditMessage = (messageId: number) => async (
     type: START_EDIT_MESSAGE,
     messageId,
     message,
+    topic,
   });
 };
 
@@ -75,5 +77,10 @@ export const cancelEditMessage = () => ({
 export const debugFlagToggle = (key: string, value: any) => ({
   type: DEBUG_FLAG_TOGGLE,
   key,
+  value,
+});
+
+export const saveInitialNotificationDetails = (value: {}) => ({
+  type: SAVE_INTIAL_NOTIFICATION,
   value,
 });

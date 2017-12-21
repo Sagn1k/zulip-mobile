@@ -7,6 +7,7 @@ export { default as fetchApiKey } from './fetchApiKey';
 export { default as focusPing } from './focusPing';
 export { default as getTopics } from './getTopics';
 export { default as toggleMessageStarred } from './toggleMessageStarred';
+export { default as typing } from './typing';
 
 export { default as getAlertWords } from './alert_words/getAlertWords';
 
@@ -43,11 +44,11 @@ export { default as getStreams } from './streams/getStreams';
 export { default as updateStream } from './streams/updateStream';
 
 export { default as getSubscriptions } from './subscriptions/getSubscriptions';
-export { default as muteStream } from './subscriptions/muteStream';
 export { default as muteTopic } from './subscriptions/muteTopic';
 export { default as subscriptionAdd } from './subscriptions/subscriptionAdd';
 export { default as subscriptionRemove } from './subscriptions/subscriptionRemove';
-export { default as unmuteStream } from './subscriptions/unmuteStream';
+export { default as toggleMuteStream } from './subscriptions/toggleMuteStream';
+export { default as togglePinStream } from './subscriptions/togglePinStream';
 export { default as unmuteTopic } from './subscriptions/unmuteTopic';
 
 export { default as createUserGroup } from './user_groups/createUserGroup';

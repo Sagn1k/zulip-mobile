@@ -1,14 +1,13 @@
 /* @flow */
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { StyleSheet, WebView } from 'react-native';
 
-import type { Actions, Auth, Message } from '../types';
+import type { Actions, Auth, Narrow, TypingState } from '../types';
 import css from './html/css';
 import js from './html/js';
-import head from './html/head';
-import { getResource } from '../utils/url';
+import html from './html/html';
 import renderMessagesAsHtml from './html/renderMessagesAsHtml';
-import { emojiReactionAdd, emojiReactionRemove } from '../api';
+import * as webViewEventHandlers from './webViewEventHandlers';
 
 const styles = StyleSheet.create({
   webview: {
@@ -19,84 +18,60 @@ const styles = StyleSheet.create({
 type Props = {
   actions: Actions,
   auth: Auth,
-  messages: Message[],
+  fetchingOlder: boolean,
+  fetchingNewer: boolean,
+  singleFetchProgress?: boolean,
+  renderedMessages: Object[],
+  anchor?: number,
+  narrow?: Narrow,
+  typingUsers?: TypingState,
 };
 
-export default class MessageListWeb extends PureComponent<Props> {
+export default class MessageListWeb extends Component<Props> {
   webview: ?Object;
   props: Props;
 
-  handleClick = ({ target, targetNodeName, targetClassName }: {
-    target: string, targetNodeName: string, targetClassName: string
-  }) => {};
-
-  handleScroll = ({ y }: { y: number }) => {
-    const { actions } = this.props;
-    if (y === 0) {
-      actions.fetchOlder();
-    }
-  };
-
-  handleAvatar = ({ fromEmail }: { fromEmail: string }) => {
-    const { actions } = this.props;
-    actions.navigateToAccountDetails(fromEmail);
-  };
-
-  handleNarrow = ({ narrow, fromEmail }: { narrow: string, fromEmail: string }) => {
-    const { actions } = this.props;
-
-    actions.doNarrow(JSON.parse(narrow.replace(/'/g, '"')));
-  };
-
-  handleImage = ({ src, messageId }: { src: string, messageId: number }) => {
-    const { actions, auth, messages } = this.props;
-
-    const message = messages.find(x => x.id === messageId);
-    const resource = getResource(src, auth);
-
-    actions.navigateToLightbox(resource, message);
-  };
-
   handleMessage = (event: Object) => {
-    const data = JSON.parse(event.nativeEvent.data);
-    const handler = `handle${data.type.charAt(0).toUpperCase()}${data.type.slice(1)}`;
+    const eventData = JSON.parse(event.nativeEvent.data);
+    const handler = `handle${eventData.type.charAt(0).toUpperCase()}${eventData.type.slice(1)}`;
 
     // $FlowFixMe
-    this[handler](data);
+    webViewEventHandlers[handler](this.props, eventData);
   };
 
-  handleReaction = ({
-    messageId,
-    name,
-    voted,
-  }: {
-    messageId: number,
-    name: string,
-    voted: boolean,
-  }) => {
+  sendMessage = (msg: Object) => {
+    if (this.webview) {
+      this.webview.postMessage(JSON.stringify(msg), '*');
+    }
+  };
+
+  shouldComponentUpdate = () => false;
+
+  content = () => {
     const { auth } = this.props;
 
-    if (voted) {
-      emojiReactionRemove(auth, messageId, name);
-    } else {
-      emojiReactionAdd(auth, messageId, name);
-    }
+    return renderMessagesAsHtml(this.props)
+      .join('')
+      .replace(/src="\//g, `src="${auth.realm}/`);
+  };
+
+  componentWillReceiveProps = (nextProps: Props) => {
+    this.sendMessage({
+      type: 'content',
+      content: this.content(),
+    });
   };
 
   render() {
-    const { auth } = this.props;
-    const messagesHtml = renderMessagesAsHtml(this.props);
-    const html = messagesHtml.join('').replace(/src="\//g, `src="${auth.realm}/`);
-
     return (
       <WebView
-        source={{ html: head + css + html }}
-        injectedJavaScript={js}
+        source={{ html: css + html(this.content()) + js }}
         style={styles.webview}
         ref={webview => {
           this.webview = webview;
         }}
         onMessage={this.handleMessage}
+        javaScriptEnabled
       />
     );
   }

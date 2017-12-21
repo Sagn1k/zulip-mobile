@@ -120,7 +120,7 @@ export const getUnreadStreamsAndTopics = createSelector(
         totals[stream.stream_id] = {
           key: name,
           streamName: name,
-          isMuted: !in_home_view, // eslint-disable-line
+          isMuted: !in_home_view,
           isPrivate: invite_only,
           color,
           unread: 0,
@@ -156,6 +156,13 @@ export const getUnreadPrivateMessagesCount = createSelector(
   getPrivateMessages,
   getReadFlags,
   (privateMessages, readFlags) => countUnread(privateMessages.map(msg => msg.id), readFlags),
+);
+
+export const getUnreadByHuddlesMentionsAndPMs = createSelector(
+  getUnreadPmsTotal,
+  getUnreadHuddlesTotal,
+  getUnreadMentionsTotal,
+  (unreadPms, unreadHuddles, unreadMentions) => unreadPms + unreadHuddles + unreadMentions,
 );
 
 export const getUnreadCountInActiveNarrow = createSelector(

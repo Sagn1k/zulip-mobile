@@ -18,12 +18,11 @@ import {
   getMessageById,
   muteTopic,
   unmuteTopic,
-  unmuteStream,
-  muteStream,
+  toggleMuteStream,
   deleteMessage,
   toggleMessageStarred,
 } from '../api';
-import showToast from '../utils/showToast';
+import { showToast } from '../utils/info';
 
 type MessageAndDoNarrowType = {
   message: Object,
@@ -129,7 +128,7 @@ const copyToClipboard = async ({ getString, auth, message }: AuthGetStringAndMes
 const isSentMessage = ({ message }: Message): boolean => !isAnOutboxMessage({ message });
 
 const editMessage = async ({ message, actions }: MessageAuthAndActions) => {
-  actions.startEditMessage(message.id);
+  actions.startEditMessage(message.id, message.subject);
 };
 
 const doDeleteMessage = async ({ auth, message, actions }: MessageAuthAndActions) => {
@@ -151,14 +150,14 @@ const doMuteTopic = ({ auth, message }: AuthAndMessageType) => {
 const doUnmuteStream = ({ auth, message, subscriptions }: AuthMessageAndSubscriptionsType) => {
   const sub = subscriptions.find(x => x.name === message.display_recipient);
   if (sub) {
-    unmuteStream(auth, sub.stream_id);
+    toggleMuteStream(auth, sub.stream_id, false);
   }
 };
 
 const doMuteStream = ({ auth, message, subscriptions }: AuthMessageAndSubscriptionsType) => {
   const sub = subscriptions.find(x => x.name === message.display_recipient);
   if (sub) {
-    muteStream(auth, sub.stream_id);
+    toggleMuteStream(auth, sub.stream_id, true);
   }
 };
 

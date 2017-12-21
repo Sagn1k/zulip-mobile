@@ -1,7 +1,7 @@
 /* @flow */
 import React, { PureComponent } from 'react';
 
-import type { Actions, Narrow } from '../types';
+import type { Actions, Narrow, Stream } from '../types';
 import connectWithActions from '../connectWithActions';
 import {
   isHomeNarrow,
@@ -11,7 +11,7 @@ import {
   isStreamNarrow,
   isTopicNarrow,
 } from '../utils/narrow';
-import { getCurrentRealm } from '../selectors';
+import { getCurrentRealm, getRecipientsInGroupNarrow, getTitleTextColor } from '../selectors';
 import NavButton from '../nav/NavButton';
 import NavButtonPlaceholder from '../nav/NavButtonPlaceholder';
 
@@ -19,19 +19,29 @@ type Props = {
   actions: Actions,
   narrow: Narrow,
   color: string,
+  recipients: string[],
+  streams: Stream[],
 };
 
 class InfoNavButton extends PureComponent<Props> {
   props: Props;
 
   handleStreamInfo = () => {
-    const { actions, narrow } = this.props;
-    actions.streamSettings(narrow[0].operand);
+    const { actions, narrow, streams } = this.props;
+    const stream = streams.find(x => x.name === narrow[0].operand);
+    if (stream) {
+      actions.navigateToStream(stream.stream_id);
+    }
   };
 
   handlePrivateInfo = () => {
     const { actions, narrow } = this.props;
     actions.navigateToAccountDetails(narrow[0].operand);
+  };
+
+  handleGroupInfo = () => {
+    const { actions, recipients } = this.props;
+    actions.navigateToGroupDetails(recipients);
   };
 
   render() {
@@ -40,10 +50,10 @@ class InfoNavButton extends PureComponent<Props> {
     const handlers = [
       { isFunc: isHomeNarrow, handlerFunc: null },
       { isFunc: isSpecialNarrow, handlerFunc: null },
-      { isFunc: isStreamNarrow, handlerFunc: null }, // TODO: this.handleStreamInfo },
-      { isFunc: isTopicNarrow, handlerFunc: null }, // TODO: this.handleStreamInfo },
+      { isFunc: isStreamNarrow, handlerFunc: this.handleStreamInfo },
+      { isFunc: isTopicNarrow, handlerFunc: this.handleStreamInfo },
       { isFunc: isPrivateNarrow, handlerFunc: this.handlePrivateInfo },
-      { isFunc: isGroupNarrow, handlerFunc: null }, // TODO: show user list
+      { isFunc: isGroupNarrow, handlerFunc: this.handleGroupInfo },
     ];
     const pressHandler = handlers.find(x => x.isFunc(narrow));
 
@@ -56,7 +66,7 @@ class InfoNavButton extends PureComponent<Props> {
 export default connectWithActions(state => ({
   realm: getCurrentRealm(state),
   narrow: state.chat.narrow,
-  users: state.users,
-  subscriptions: state.subscriptions,
   streams: state.streams,
+  color: getTitleTextColor(state),
+  recipients: getRecipientsInGroupNarrow(state),
 }))(InfoNavButton);

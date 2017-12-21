@@ -2,13 +2,13 @@
 import React, { PureComponent } from 'react';
 
 import { Screen } from '../common';
-import CreateStreamContainer from './CreateStreamContainer';
+import EditStreamContainer from './EditStreamContainer';
 
-export default class StreamScreen extends PureComponent<{}> {
+export default class CreateStreamScreen extends PureComponent<{}> {
   render() {
     return (
       <Screen title="Create new stream" padding>
-        <CreateStreamContainer />
+        <EditStreamContainer />
       </Screen>
     );
   }

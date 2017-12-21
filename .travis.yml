@@ -17,7 +17,8 @@ notifications:
     on_failure: always
 
 install:
-  yarn
+  - npm i yarn -g
+  - yarn
 
 scripts:
   - npm run test:lint

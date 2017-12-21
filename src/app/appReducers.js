@@ -19,6 +19,7 @@ import {
   START_OUTBOX_SENDING,
   FINISHED_OUTBOX_SENDING,
   DEBUG_FLAG_TOGGLE,
+  SAVE_INTIAL_NOTIFICATION,
 } from '../actionConstants';
 import { getAuth } from '../selectors';
 
@@ -33,7 +34,6 @@ const initialState: AppState = {
   needsInitialFetch: false,
   orientation: 'PORTRAIT',
   outboxSending: false,
-  pushToken: '',
   safeAreaInsets: {
     bottom: 0,
     left: 0,
@@ -41,9 +41,10 @@ const initialState: AppState = {
     top: 0,
   },
   debug: {
-    htmlMessages: false,
+    htmlMessages: true,
     unreadMessages: false,
     splitMessageText: false,
+    initialNotification: {},
   },
 };
 
@@ -130,6 +131,7 @@ export default (state: AppState = initialState, action: Action) => {
         editMessage: {
           id: action.messageId,
           content: action.message,
+          topic: action.topic,
         },
       };
 
@@ -145,6 +147,15 @@ export default (state: AppState = initialState, action: Action) => {
         debug: {
           ...state.debug,
           [action.key]: action.value,
+        },
+      };
+
+    case SAVE_INTIAL_NOTIFICATION:
+      return {
+        ...state,
+        debug: {
+          ...state.debug,
+          initialNotification: action.value,
         },
       };
 

@@ -3,18 +3,13 @@ import React, { PureComponent } from 'react';
 import { StyleSheet, SectionList } from 'react-native';
 
 import { StyleObj, User } from '../types';
-import { RawLabel, SearchEmptyState } from '../common';
+import { SectionHeader, SearchEmptyState } from '../common';
 import UserItem from './UserItem';
-import { sortUserList, filterUserList, groupUsersByInitials } from '../users/userHelpers';
+import { sortUserList, filterUserList, groupUsersByStatus } from '../users/userHelpers';
 
 const styles = StyleSheet.create({
   list: {
     flex: 1,
-  },
-  groupHeader: {
-    fontWeight: 'bold',
-    paddingLeft: 8,
-    fontSize: 18,
   },
 });
 
@@ -41,13 +36,16 @@ export default class UserList extends PureComponent<Props> {
   render() {
     const { filter, style, users, presences, onPress, selected } = this.props;
     const shownUsers = sortUserList(filterUserList(users, filter));
-    const groupedUsers = groupUsersByInitials(shownUsers);
-    const sections = Object.keys(groupedUsers).map(key => ({ key, data: groupedUsers[key] }));
-    const noResults = shownUsers.length === 0;
 
-    if (noResults) {
+    if (shownUsers.length === 0) {
       return <SearchEmptyState text="No users found" />;
     }
+
+    const groupedUsers = groupUsersByStatus(shownUsers, presences);
+    const sections = Object.keys(groupedUsers).map(key => ({
+      key: `${key.charAt(0).toUpperCase()}${key.slice(1)}`,
+      data: groupedUsers[key],
+    }));
 
     return (
       <SectionList
@@ -70,12 +68,12 @@ export default class UserList extends PureComponent<Props> {
             isSelected={selected.find(user => user.id === item.id)}
           />
         )}
-        renderSectionHeader={({ section }) => (
-          <RawLabel
-            style={[styles.groupHeader, this.context.styles.backgroundColor]}
-            text={section.key || ''}
-          />
-        )}
+        renderSectionHeader={({ section }) =>
+          section.data.length === 0 ? null : (
+            // $FlowFixMe
+            <SectionHeader text={section.key} />
+          )
+        }
       />
     );
   }

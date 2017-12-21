@@ -1,4 +1,5 @@
 /* @flow */
+import isEqual from 'lodash.isequal';
 
 export const caseInsensitiveCompareFunc = (a: any, b: any): number =>
   a.toLowerCase().localeCompare(b.toLowerCase());
@@ -18,3 +19,11 @@ export const deeperMerge = (obj1: Object, obj2: Object): Object =>
 
 export const initialsFromName = (name: string) =>
   (name.match(/\S+\s*/g) || []).map(x => x[0].toUpperCase()).join('');
+
+export const removeEmptyValues = (obj: Object): Object => {
+  Object.keys(obj).forEach(key => obj[key] == null && delete obj[key]);
+  return obj;
+};
+
+export const isStateGoingBack = (cur: Object, prev: Object): boolean =>
+  cur.nav.routes.length < prev.nav.routes.length || isEqual(cur, prev);

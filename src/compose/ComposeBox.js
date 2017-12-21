@@ -14,7 +14,7 @@ import type {
 } from '../types';
 import { updateMessage } from '../api';
 import { FloatingActionButton, Input, MultilineInput } from '../common';
-import { showErrorAlert } from '../common/errorAlert';
+import { showErrorAlert } from '../utils/info';
 import { IconDone, IconSend } from '../common/Icons';
 import { isStreamNarrow, topicNarrow } from '../utils/narrow';
 import ComposeMenuContainer from './ComposeMenuContainer';
@@ -106,8 +106,8 @@ export default class ComposeBox extends PureComponent<Props, State> {
 
   handleMessageChange = (message: string) => {
     this.setState({ message });
-    const { actions } = this.props;
-    actions.sendFocusPing();
+    const { actions, narrow } = this.props;
+    actions.sendTypingEvent(narrow);
   };
 
   handleMessageSelectionChange = (event: Object) => {
@@ -175,11 +175,14 @@ export default class ComposeBox extends PureComponent<Props, State> {
 
   handleEdit = () => {
     const { auth, editMessage, actions } = this.props;
-    const { message } = this.state;
-    if (editMessage.content !== message) {
-      updateMessage(auth, replaceEmoticonsWithEmoji(message), editMessage.id).catch(error =>
-        showErrorAlert(error.message, 'Failed to edit message'),
-      );
+    const { message, topic } = this.state;
+    const content =
+      editMessage.content !== message ? replaceEmoticonsWithEmoji(message) : undefined;
+    const subject = topic !== editMessage.topic ? topic : undefined;
+    if (content || subject) {
+      updateMessage(auth, { content, subject }, editMessage.id).catch(error => {
+        showErrorAlert(error.message, 'Failed to edit message');
+      });
     }
     actions.cancelEditMessage();
   };
@@ -187,7 +190,7 @@ export default class ComposeBox extends PureComponent<Props, State> {
   tryUpdateDraft = () => {
     const { actions, draft, narrow } = this.props;
     const { message } = this.state;
-    if (message !== '' && draft !== message) {
+    if (draft !== message) {
       actions.saveToDrafts(JSON.stringify(narrow), message);
     }
   };
@@ -205,8 +208,13 @@ export default class ComposeBox extends PureComponent<Props, State> {
 
   componentWillReceiveProps(nextProps: Props) {
     if (nextProps.editMessage !== this.props.editMessage) {
+      const topic =
+        isStreamNarrow(nextProps.narrow) && nextProps.editMessage
+          ? nextProps.editMessage.topic
+          : '';
       this.setState({
         message: nextProps.editMessage ? nextProps.editMessage.content : '',
+        topic,
       });
       this.messageInput.focus();
     } else if (!isEqual(nextProps.narrow, this.props.narrow)) {
@@ -308,7 +316,7 @@ export default class ComposeBox extends PureComponent<Props, State> {
               style={componentStyles.button}
               Icon={editMessage === null ? IconSend : IconDone}
               size={32}
-              disabled={message.length === 0}
+              disabled={message.trim().length === 0}
               onPress={editMessage === null ? this.handleSend : this.handleEdit}
             />
           </View>
